@@ -12,6 +12,10 @@ class PixelStrip(object):
         blinkt.set_all(color.red(), color.green(), color.blue())
         blinkt.show()
 
+    def set(self, index, color):
+        blinkt.set_pixel(index, color.red(), color.green(), color.blue())
+        blinkt.show()
+
     def off(self):
         blinkt.clear()
         self.isOn = False
@@ -19,3 +23,6 @@ class PixelStrip(object):
     def on(self):
         self.set_all(self.color)
         self.isOn = True
+
+    def number_of_pixels(self):
+        return blinkt.NUM_PIXELS

@@ -1,7 +1,8 @@
 class Effect(object):
 
-    def __init__(self, pixelStrip):
+    def __init__(self, pixelStrip, updateInterval=1.0):
         self.pixelStrip = pixelStrip
+        self.updateInterval = updateInterval
 
     def start(self):
         """ Implement the starting of the effect here """
