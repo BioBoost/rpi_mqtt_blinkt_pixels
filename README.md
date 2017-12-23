@@ -2,3 +2,9 @@
 
 Very simple MQTT client app in Python that allows control of Blinkt pixel strip
 attached to my kids bed.
+
+## Dependencies
+
+```shell
+pip3 install paho-mqtt
+```
