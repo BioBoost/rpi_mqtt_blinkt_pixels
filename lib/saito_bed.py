@@ -1,5 +1,6 @@
 from lib.simple_mqtt_client import *
 from lib.effects.color_effect import *
+from lib.effects.nightrider_effect import *
 from lib.effect_manager import *
 from uuid import getnode as get_mac
 import json
@@ -10,7 +11,7 @@ neopixel_schema = {
     "type" : "object",
     "properties" : {
         "state" : {"enum" : ["ON", "OFF"]},
-        "effect" : {"enum" : ["rainbow", "rainbowcycle", "theaterchaserainbow", "colorwipe", "theaterchase"]},
+        "effect" : {"enum" : ["rainbow", "nightrider"]},
         "brightness" : {"type": "number", "minimum": 0, "maximum": 255 },
         "color": {
             "type" : "object",
@@ -30,7 +31,8 @@ class SaitoBed(object):
         self.mqttBroker = mqttBroker
         self.baseTopic = baseTopic
         self.effectManager = EffectManager(pixelStrip)
-        self.effectManager.set_effect(ColorEffect(pixelStrip, Colors.RED))
+        self.effectManager.set_effect(ColorEffect(pixelStrip, Colors.BLACK))
+        self.effectManager.disable()
         self.__setup_mqtt()
 
     def stop(self):
@@ -60,17 +62,21 @@ class SaitoBed(object):
                     self.effectManager.enable()
                 elif jsonData['state'] == 'OFF':
                     self.effectManager.disable()
-                else:
-                    print("Invalid state for neopixels " + jsonData['state'])
+
+            effect = ColorEffect(self.pixelStrip)
+            if ('effect' in jsonData) and (jsonData['effect'] == 'nightrider'):
+                effect = NightRiderEffect(self.pixelStrip)
 
             if 'color' in jsonData:
-                print("Color present")
                 components = jsonData['color']
                 color = Color(components['r'], components['g'], components['b'])
-                self.effectManager.set_effect(ColorEffect(self.pixelStrip, color))
+                effect.set_color(color)
 
             if ('brightness' in jsonData):
-                self.effectManager.get_current_effect().set_brightness(jsonData['brightness'])
+                effect.set_brightness(jsonData['brightness'])
+
+            self.effectManager.set_effect(effect)
+
         except exceptions.ValidationError:
             print("Message failed validation")
         except ValueError:
@@ -92,5 +98,8 @@ class SaitoBed(object):
                 "b": self.effectManager.get_current_effect().get_color().blue()
             }
         }
+
+        if isinstance(self.effectManager.get_current_effect(), NightRiderEffect):
+            json_state['effect'] = 'nightrider'
 
         return json.dumps(json_state)
