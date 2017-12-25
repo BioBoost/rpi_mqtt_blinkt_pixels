@@ -33,6 +33,6 @@ class SimpleMqttClient(object):
             self.client.message_callback_add(topic, callback)
         self.client.subscribe(topic)
 
-    def publish(self, topic, payload, QOS, doRetain=False):
+    def publish(self, topic, payload, QOS=0, doRetain=False):
         (status, mid) = self.client.publish(topic, payload, QOS, doRetain)
         return (status, mid)

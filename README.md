@@ -7,4 +7,5 @@ attached to my kids bed.
 
 ```shell
 pip3 install paho-mqtt
+pip3 install jsonschema
 ```
