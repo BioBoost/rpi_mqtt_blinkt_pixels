@@ -22,6 +22,6 @@ class RainbowEffect(Effect):
     def run(self):
         """ Implement the actual effect here """
         for i in range(self.pixelStrip.number_of_pixels()):
-            self.pixelStrip.set(i, wheel((i+self.iteration) & 255))
+            self.pixelStrip.set(i, wheel((i+self.iteration) & 255), self.brightness)
 
         self.iteration += 1
