@@ -69,8 +69,8 @@ class SaitoBed(object):
                 color = Color(components['r'], components['g'], components['b'])
                 self.effectManager.set_effect(ColorEffect(self.pixelStrip, color))
 
-            # if (data.has_key('brightness')):
-            #     neopixelstring.set_brightness(data['brightness'])
+            if ('brightness' in jsonData):
+                self.effectManager.get_current_effect().set_brightness(jsonData['brightness'])
         except exceptions.ValidationError:
             print("Message failed validation")
         except ValueError:
@@ -84,7 +84,7 @@ class SaitoBed(object):
 
     def __get_pixelstrip_state(self):
         json_state = {
-            "brightness": 255,
+            "brightness": self.effectManager.get_current_effect().get_brightness(),
             "state": "ON" if self.effectManager.is_enabled() else "OFF",
             "color": {
                 "r": self.effectManager.get_current_effect().get_color().red(),

@@ -3,9 +3,8 @@ from lib.effects.effect import *
 
 class ColorEffect(Effect):
 
-    def __init__(self, pixelStrip, color=Colors.WHITE):
-        super().__init__(pixelStrip)
-        self.color = color
+    def __init__(self, pixelStrip, color=Colors.WHITE, brightness=255):
+        super().__init__(pixelStrip, color, brightness)
 
     def start(self):
         """ Implement the starting of the effect here """
@@ -17,4 +16,4 @@ class ColorEffect(Effect):
 
     def run(self):
         """ Implement the actual effect here """
-        self.pixelStrip.set_all(self.color)
+        self.pixelStrip.set_all(self.color, self.brightness)

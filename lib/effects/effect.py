@@ -2,10 +2,11 @@ from lib.color import *
 
 class Effect(object):
 
-    def __init__(self, pixelStrip, updateInterval=1.0):
+    def __init__(self, pixelStrip, color=Colors.BLACK, brightness=255, updateInterval=1.0):
         self.pixelStrip = pixelStrip
         self.updateInterval = updateInterval
-        self.color = Colors.BLACK
+        self.color = color
+        self.set_brightness(brightness)
 
     def start(self):
         """ Implement the starting of the effect here """
@@ -21,3 +22,9 @@ class Effect(object):
 
     def get_color(self):
         return self.color
+
+    def get_brightness(self):
+        return self.brightness
+
+    def set_brightness(self, brightness):
+        self.brightness = brightness
