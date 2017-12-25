@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from time import sleep
 import sys
 from lib.pixel_strip import *
