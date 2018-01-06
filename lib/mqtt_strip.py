@@ -2,6 +2,8 @@ from lib.simple_mqtt_client import *
 from lib.effects.color_effect import *
 from lib.effects.nightrider_effect import *
 from lib.effects.rainbow_effect import *
+from lib.effects.strobe_effect import *
+from lib.effects.group_shift_effect import *
 from lib.effect_manager import *
 from uuid import getnode as get_mac
 import json
@@ -12,7 +14,9 @@ neopixel_schema = {
     "type" : "object",
     "properties" : {
         "state" : {"enum" : ["ON", "OFF"]},
-        "effect" : {"enum" : ["rainbow", "nightrider"]},
+        "effect" : {"enum" : ["rainbow", "nightrider", "strobe", "groupshift"]},
+        "interval_ms" : {"type": "number", "minimum": 0, "maximum": 5000 },
+        "group_size" : {"type": "number"},
         "brightness" : {"type": "number", "minimum": 0, "maximum": 255 },
         "color": {
             "type" : "object",
@@ -27,11 +31,12 @@ neopixel_schema = {
 }
 
 class MqttStrip(object):
-    def __init__(self, pixelStrip, mqttBroker, baseTopic, stripId="neopixels"):
+    def __init__(self, pixelStrip, mqttBroker, baseTopic, stripId="neopixels", retainEffect=False):
         self.pixelStrip = pixelStrip
         self.mqttBroker = mqttBroker
         self.baseTopic = baseTopic
         self.stripId = stripId
+        self.retainEffect = retainEffect
         self.effectManager = EffectManager(pixelStrip)
         self.effectManager.set_effect(ColorEffect(pixelStrip, Colors.BLACK))
         self.effectManager.disable()
@@ -40,6 +45,7 @@ class MqttStrip(object):
     def stop(self):
         print("Stopping MQTT Strip API")
         self.mqttClient.stop()
+        self.pixelStrip.off()
 
     def __setup_mqtt(self):
         clientId = str(get_mac()) + "-python_client"
@@ -66,12 +72,20 @@ class MqttStrip(object):
                     self.effectManager.disable()
 
             if len(jsonData.keys()) > 1:
-                effect = self.effectManager.get_current_effect()
+                effect = ColorEffect(self.pixelStrip)
+                if self.retainEffect:
+                    effect = self.effectManager.get_current_effect()
 
                 if ('effect' in jsonData) and (jsonData['effect'] == 'nightrider'):
                     effect = NightRiderEffect(self.pixelStrip)
                 elif ('effect' in jsonData) and (jsonData['effect'] == 'rainbow'):
                     effect = RainbowEffect(self.pixelStrip)
+                elif ('effect' in jsonData) and (jsonData['effect'] == 'strobe'):
+                    effect = StrobeEffect(self.pixelStrip)
+                elif ('effect' in jsonData) and (jsonData['effect'] == 'groupshift'):
+                    effect = GroupShiftEffect(self.pixelStrip)
+                    groupSize = jsonData['group_size'] if ('group_size' in jsonData) else 8
+                    effect.set_group_size(groupSize)
 
                 if 'color' in jsonData:
                     components = jsonData['color']
@@ -79,6 +93,9 @@ class MqttStrip(object):
 
                 if ('brightness' in jsonData):
                     effect.set_brightness(jsonData['brightness'])
+
+                if ('interval_ms' in jsonData):
+                    effect.set_update_interval(jsonData['interval_ms']/1000)
 
                 self.effectManager.set_effect(effect)
 
@@ -108,5 +125,9 @@ class MqttStrip(object):
             json_state['effect'] = 'nightrider'
         elif isinstance(self.effectManager.get_current_effect(), RainbowEffect):
             json_state['effect'] = 'rainbow'
+        elif isinstance(self.effectManager.get_current_effect(), StrobeEffect):
+            json_state['effect'] = 'strobe'
+        elif isinstance(self.effectManager.get_current_effect(), GroupShiftEffect):
+            json_state['effect'] = 'groupshift'
 
         return json.dumps(json_state)

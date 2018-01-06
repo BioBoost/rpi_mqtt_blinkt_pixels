@@ -4,7 +4,7 @@ class Effect(object):
 
     def __init__(self, pixelStrip, color=Colors.BLACK, brightness=255, updateInterval=1.0):
         self.pixelStrip = pixelStrip
-        self.updateInterval = updateInterval
+        self.set_update_interval(updateInterval)
         self.set_color(color)
         self.set_brightness(brightness)
 
@@ -31,3 +31,6 @@ class Effect(object):
 
     def set_color(self, color):
         self.color = color
+
+    def set_update_interval(self, updateInterval):
+        self.updateInterval = updateInterval
