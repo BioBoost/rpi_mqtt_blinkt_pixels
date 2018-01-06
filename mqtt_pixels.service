@@ -4,7 +4,7 @@ Wants=network-online.target
 After=network.target network-online.target
 
 [Service]
-ExecStart=/home/bioboost/rpi_mqtt_blinkt_pixels/app.py
+ExecStart=/home/pi/rpi_mqtt_pixels/app.py
 Restart=always
 
 [Install]

@@ -29,3 +29,13 @@ scons
 cd python
 sudo python3 setup.py install
 ```
+
+## Run as a Service
+
+```shell
+chmod +x app.py
+sudo su
+cp mqtt_pixels.service /etc/systemd/system
+systemctl enable mqtt_pixels.service
+systemctl start mqtt_pixels.service
+```
