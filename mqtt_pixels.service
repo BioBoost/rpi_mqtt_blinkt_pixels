@@ -1,0 +1,11 @@
+[Unit]
+Description=MQTT Pixels
+Wants=network-online.target
+After=network.target network-online.target
+
+[Service]
+ExecStart=/home/bioboost/rpi_mqtt_blinkt_pixels/app.py
+Restart=always
+
+[Install]
+WantedBy=default.target

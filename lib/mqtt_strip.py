@@ -26,33 +26,34 @@ neopixel_schema = {
     }
 }
 
-class SaitoBed(object):
-    def __init__(self, pixelStrip, mqttBroker, baseTopic="saito/bed"):
+class MqttStrip(object):
+    def __init__(self, pixelStrip, mqttBroker, baseTopic, stripId="neopixels"):
         self.pixelStrip = pixelStrip
         self.mqttBroker = mqttBroker
         self.baseTopic = baseTopic
+        self.stripId = stripId
         self.effectManager = EffectManager(pixelStrip)
         self.effectManager.set_effect(ColorEffect(pixelStrip, Colors.BLACK))
         self.effectManager.disable()
         self.__setup_mqtt()
 
     def stop(self):
-        print("Stopping MQTT API")
+        print("Stopping MQTT Strip API")
         self.mqttClient.stop()
 
     def __setup_mqtt(self):
         clientId = str(get_mac()) + "-python_client"
         self.mqttClient = SimpleMqttClient(clientId, self.mqttBroker)
-        self.mqttClient.subscribe(self.baseTopic + "/neopixels/set", self.__mqtt_message_handler)
+        self.mqttClient.subscribe(self.baseTopic + "/" + self.stripId + "/set", self.__mqtt_message_handler)
         sleep(2)
-        self.__publish_pixelstrip_state()       # For Home Assistant
+        self.__publish_pixel_strip_state()       # For Home Assistant
 
     def __mqtt_message_handler(self, client, userdata, msg):
-        print("Getting set neopixels request: " + msg.payload.decode('utf-8'))
-        self.__set_neopixels(msg.payload.decode('utf-8'))
-        self.__publish_pixelstrip_state()       # For Home Assistant
+        print("Getting set pixel strip request: " + msg.payload.decode('utf-8'))
+        self.__set_pixel_strip(msg.payload.decode('utf-8'))
+        self.__publish_pixel_strip_state()       # For Home Assistant
 
-    def __set_neopixels(self, jsonString):
+    def __set_pixel_strip(self, jsonString):
         try:
             jsonData = json.loads(jsonString)
             # If no exception is raised by validate(), the instance is valid.
@@ -86,13 +87,13 @@ class SaitoBed(object):
         except ValueError:
             print("Invalid json string")
 
-    def __publish_pixelstrip_state(self):
-        state = self.__get_pixelstrip_state()
-        (status, mid) = self.mqttClient.publish(self.baseTopic + "/neopixels", state)
+    def __publish_pixel_strip_state(self):
+        state = self.__get_pixel_strip_state()
+        (status, mid) = self.mqttClient.publish(self.baseTopic + "/" + self.stripId, state)
         if status != 0:
             print("Could not send state")
 
-    def __get_pixelstrip_state(self):
+    def __get_pixel_strip_state(self):
         json_state = {
             "brightness": self.effectManager.get_current_effect().get_brightness(),
             "state": "ON" if self.effectManager.is_enabled() else "OFF",
